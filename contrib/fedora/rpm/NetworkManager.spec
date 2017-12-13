@@ -50,6 +50,12 @@
 %bcond_without wwan
 %bcond_without team
 %bcond_without wifi
+%if %{with wifi}
+# still disable by default.
+%bcond_with iwd
+%else
+%bcond_with iwd
+%endif
 %bcond_without ovs
 %bcond_without ppp
 %bcond_without nmtui
@@ -221,6 +227,11 @@ Summary: Wifi plugin for NetworkManager
 Group: System Environment/Base
 Requires: %{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Requires: wpa_supplicant >= 1:1.1
+# the wifi plugin doesn't require iwd, even if it was build with
+# iwd support. Note that the plugin supports both supplicant and
+# iwd backend, that doesn't mean that the user requires to have them
+# both installed. Maybe both iwd and supplicant should Provide a "wireless-daemon"
+# meta package.
 Obsoletes: NetworkManager < %{obsoletes_device_plugins}
 
 %description wifi
@@ -425,6 +436,11 @@ intltoolize --automake --copy --force
 %endif
 %else
 	--enable-wifi=no \
+%endif
+%if %{with iwd}
+	--with-iwd=yes \
+%else
+	--with-iwd=no \
 %endif
 	--enable-vala=yes \
 	--enable-introspection \
